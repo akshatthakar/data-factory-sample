@@ -1,0 +1,9 @@
+{
+	"name": "moderndwhdatafactory",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "2fa4a7d1-bf53-4ed7-ab72-14479a57f27a",
+		"tenantId": "124d38e1-fd5b-4382-87c5-0323f8b79b62"
+	}
+}

@@ -1,0 +1,43 @@
+{
+	"name": "AzureSqlConcesssion",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "CONS_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CONS_CODE",
+				"type": "varchar"
+			},
+			{
+				"name": "CONS_DESCRIPTION",
+				"type": "varchar"
+			},
+			{
+				"name": "_inserted_dt",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "_updated_dt",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "sales",
+			"table": "DIM_CONS"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

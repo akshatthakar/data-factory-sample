@@ -1,0 +1,64 @@
+{
+	"name": "dataflowprod",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "InputCSV",
+						"type": "DatasetReference"
+					},
+					"name": "CSVSource"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlProduct",
+						"type": "DatasetReference"
+					},
+					"name": "dwhdb"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlProduct",
+						"type": "DatasetReference"
+					},
+					"name": "dwhdbStore"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlProduct",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "createHash"
+				},
+				{
+					"name": "Exists1"
+				},
+				{
+					"name": "Lookup1"
+				},
+				{
+					"name": "SetAttrributes"
+				},
+				{
+					"name": "Aggregate1"
+				},
+				{
+					"name": "CreateHashNewData"
+				},
+				{
+					"name": "AlterRow1"
+				}
+			],
+			"script": "source(output(\n\t\tStore_Code as integer,\n\t\tStore_Name as string,\n\t\tCOMPANY as string,\n\t\tCompartment as string,\n\t\tSubCompartment as string,\n\t\tTYPE as string,\n\t\tnick_name as string,\n\t\tprod_code as string,\n\t\tNetSold_Qty as short,\n\t\tCost as string,\n\t\tRetail_Price as string,\n\t\tUnit_Price_Sold as string,\n\t\tFinalPrice as boolean,\n\t\tCONCESSION_ID as integer,\n\t\tCONCESSION_Code as string,\n\t\tNew_Price_After_Discount as string,\n\t\tCONCESSION_Description as string,\n\t\tAmount_Discount as string,\n\t\tPercent_Discount as double,\n\t\tNetSold_Amount as string,\n\t\tTAX_RATE as double,\n\t\tTAX_AMOUNT1 as double,\n\t\tTAX_AMOUNT2 as double,\n\t\temp_code as string,\n\t\tEmp_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSVSource\nsource(output(\n\t\tPROD_ID as integer,\n\t\tPROD_TYPE as string,\n\t\tPROD_NAME as string,\n\t\tPROD_CODE as string,\n\t\tLABEL_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> dwhdb\nsource(output(\n\t\tPROD_ID as integer,\n\t\tPROD_TYPE as string,\n\t\tPROD_NAME as string,\n\t\tPROD_CODE as string,\n\t\tLABEL_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> dwhdbStore\ndwhdb derive(dimhash = sha1(PROD_NAME+ PROD_CODE)) ~> createHash\nCreateHashNewData, createHash exists(newdatahash == dimhash,\n\tnegate:true,\n\tbroadcast: 'auto')~> Exists1\nExists1, dwhdbStore lookup(toString(CSVSource@prod_code) == dwhdbStore@PROD_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nLookup1 derive(PROD_CODE = CSVSource@prod_code,\n\t\tPROD_NAME = nick_name,\n\t\tPROD_TYPE = TYPE,\n\t\t{_updated_dt} = currentTimestamp(),\n\t\tLABEL_NAME = COMPANY,\n\t\t{_inserted_dt} = iif(isNull(PROD_ID) ,  currentTimestamp(), {_inserted_dt})) ~> SetAttrributes\nSetAttrributes aggregate(groupBy(PROD_ID,\n\t\tPROD_TYPE,\n\t\tPROD_NAME,\n\t\tSetAttrributes@PROD_CODE,\n\t\tLABEL_NAME,\n\t\t{_inserted_dt},\n\t\t{_updated_dt}),\n\tcount = count(SetAttrributes@PROD_CODE)) ~> Aggregate1\nCSVSource derive(newdatahash = sha1(nick_name+ toString(prod_code))) ~> CreateHashNewData\nAggregate1 alterRow(updateIf(not(isNull(PROD_ID))),\n\tinsertIf(isNull(PROD_ID))) ~> AlterRow1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tPROD_ID as integer,\n\t\tPROD_TYPE as string,\n\t\tPROD_NAME as string,\n\t\tPROD_CODE as string,\n\t\tLABEL_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['PROD_NAME'],\n\tformat: 'table',\n\tstagingSchemaName: 'sales',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError',\n\tmapColumn(\n\t\tPROD_NAME,\n\t\tPROD_TYPE,\n\t\tPROD_CODE,\n\t\tLABEL_NAME,\n\t\t{_inserted_dt},\n\t\t{_updated_dt}\n\t)) ~> sink1"
+		}
+	}
+}

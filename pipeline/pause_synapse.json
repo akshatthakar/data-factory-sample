@@ -1,0 +1,62 @@
+{
+	"name": "pause_synapse",
+	"properties": {
+		"activities": [
+			{
+				"name": "Web2",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://login.microsoftonline.com/124d38e1-fd5b-4382-87c5-0323f8b79b62/oauth2/token",
+					"method": "POST",
+					"headers": {
+						"Content-type": "application/x-www-form-urlencoded"
+					},
+					"body": "grant_type=client_credentials&client_secret=Np2APxLvWiUK_pszRHSrby0g1HHv95_H~k&client_id=http://demodwhaccount&resource=https://management.azure.com"
+				}
+			},
+			{
+				"name": "Web3",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Web2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://management.azure.com/subscriptions/f76e3096-fb65-4c23-8542-a9d8bfbfddec/resourceGroups/Azure_DW_Modernization/providers/Microsoft.Sql/servers/projectdemo/databases/projectdemosynapse/pause?api-version=2020-08-01-preview",
+					"method": "POST",
+					"headers": {
+						"Authorization": {
+							"value": "@concat('Bearer ',activity('Web2').output.access_token)",
+							"type": "Expression"
+						}
+					},
+					"body": "\"\""
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2021-06-01T11:22:36Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

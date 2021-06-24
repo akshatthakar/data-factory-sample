@@ -1,0 +1,35 @@
+{
+	"name": "dataflowrestconnect",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Json4",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText2",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Flatten1"
+				},
+				{
+					"name": "DerivedColumn1"
+				}
+			],
+			"script": "source(output(\n\t\tresult as (Amount_Discount as string, CAIS as short, COMPANY as string, CONCESSION_Code as string, CONCESSION_Description as string, CONCESSION_ID as integer, Compartment as string, Cost as string, Inseam as string, LINE_ID as short, Line_Applied as double, NetSold_Amount as string, NetSold_Qty as short, New_Price_After_Discount as string, Percent_Discount as double, PriceOverride as boolean, RCPT_NOTE1 as string, RCPT_NOTE2 as string, Retail_Price as string, SALE_TYPE as string, Shop_Code as string, Shop_Name as string, SubCompartment as string, Surver_Age as string, Surver_Gender as string, TAX_AMOUNT1 as double, TAX_AMOUNT2 as double, TAX_RATE as double, TRANSDATE as date, TRANSNUM as short, TRANSTIME as integer, TRANSTIMESTR as integer, TS_ID as timestamp, TYPE as string, Unit_Price_Sold as string, VOID_FLAG as boolean, Waist as string, emp_Name as string, emp_code as string, nick_name as string, prod_code as string, vipcode as double)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'singleDocument') ~> source1\nsource1 foldDown(unroll(result),\n\tmapColumn(\n\t\tresult\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten1\nFlatten1 derive(Shop_Code = result.Shop_Code,\n\t\tShop_Name = result.Shop_Name,\n\t\tCOMPANY = result.COMPANY,\n\t\tCompartment = result.Compartment,\n\t\tSubCompartment = result.SubCompartment,\n\t\tTYPE = result.TYPE,\n\t\tnick_name = result.nick_name,\n\t\tprod_code = result.prod_code,\n\t\tNetSold_Qty = result.NetSold_Qty,\n\t\tCost = result.Cost,\n\t\tRetail_Price = result.Retail_Price,\n\t\tUnit_Price_Sold = result.Unit_Price_Sold,\n\t\tPriceOverride = result.PriceOverride,\n\t\tCONCESSION_ID = result.CONCESSION_ID,\n\t\tCONCESSION_Code = result.CONCESSION_Code,\n\t\tNew_Price_After_Discount = result.New_Price_After_Discount,\n\t\tCONCESSION_Description = result.CONCESSION_Description,\n\t\tAmount_Discount = result.Amount_Discount,\n\t\tPercent_Discount = result.Percent_Discount,\n\t\tNetSold_Amount = result.NetSold_Amount,\n\t\tTAX_RATE = result.TAX_RATE,\n\t\tTAX_AMOUNT1 = result.TAX_AMOUNT1,\n\t\tTAX_AMOUNT2 = result.TAX_AMOUNT2,\n\t\temp_code = result.emp_Name,\n\t\tEmp_Name = result.emp_Name,\n\t\tTRANSDATE = result.TRANSDATE,\n\t\tTRANSTIME = result.TRANSTIME,\n\t\tTRANSNUM = result.TRANSNUM) ~> DerivedColumn1\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tStore_Code = Shop_Code,\n\t\tStore_Name = Shop_Name,\n\t\tCOMPANY,\n\t\tCompartment,\n\t\tSubCompartment,\n\t\tTYPE,\n\t\tnick_name,\n\t\tprod_code,\n\t\tNetSold_Qty,\n\t\tCost,\n\t\tRetail_Price,\n\t\tUnit_Price_Sold,\n\t\tFinalPrice = PriceOverride,\n\t\tCONCESSION_ID,\n\t\tCONCESSION_Code,\n\t\tNew_Price_After_Discount,\n\t\tCONCESSION_Description,\n\t\tAmount_Discount,\n\t\tPercent_Discount,\n\t\tNetSold_Amount,\n\t\tTAX_RATE,\n\t\tTAX_AMOUNT1,\n\t\tTAX_AMOUNT2,\n\t\temp_code,\n\t\tEmp_Name,\n\t\tTRANSDATE,\n\t\tTRANSTIME,\n\t\tTRANSNUM\n\t)) ~> sink1"
+		}
+	}
+}

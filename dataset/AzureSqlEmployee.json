@@ -1,0 +1,43 @@
+{
+	"name": "AzureSqlEmployee",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "EMP_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "EMP_CODE",
+				"type": "varchar"
+			},
+			{
+				"name": "EMP_NAME",
+				"type": "varchar"
+			},
+			{
+				"name": "_inserted_dt",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "_updated_dt",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "sales",
+			"table": "DIM_EMP"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
