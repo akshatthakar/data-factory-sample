@@ -1,5 +1,5 @@
 {
-	"name": "InputCSV",
+	"name": "IntermediateCSV",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorage1",
