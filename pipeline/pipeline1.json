@@ -16,14 +16,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "dataflowprod",
+						"referenceName": "dataflow_bulkload",
 						"type": "DataFlowReference"
 					},
 					"staging": {
-						"linkedService": {
-							"referenceName": "AzureBlobStorage1",
-							"type": "LinkedServiceReference"
-						},
 						"folderPath": "tmp"
 					},
 					"compute": {
