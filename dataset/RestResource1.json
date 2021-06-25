@@ -1,0 +1,15 @@
+{
+	"name": "RestResource1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "RestService_dumy",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": "/transacts?from-date=2015-12-01&to-date=2015-12-02"
+		},
+		"schema": []
+	}
+}
