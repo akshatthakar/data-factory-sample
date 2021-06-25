@@ -1,0 +1,58 @@
+{
+	"name": "AzureSynapseAnalyticsShop",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSynapseAnalytics1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [
+			{
+				"name": "POS_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "POS_CODE",
+				"type": "varchar"
+			},
+			{
+				"name": "POS_LABEL",
+				"type": "varchar"
+			},
+			{
+				"name": "DISTRICT",
+				"type": "varchar"
+			},
+			{
+				"name": "BLOCK",
+				"type": "varchar"
+			},
+			{
+				"name": "REGION",
+				"type": "varchar"
+			},
+			{
+				"name": "TIER",
+				"type": "varchar"
+			},
+			{
+				"name": "_inserted_dt",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "_updated_dt",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "sales",
+			"table": "DIM_POS"
+		}
+	}
+}
