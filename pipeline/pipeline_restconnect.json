@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Web1",
+				"name": "Fetch Token",
 				"type": "WebActivity",
 				"dependsOn": [],
 				"policy": {
@@ -15,17 +15,12 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"url": "http://20.84.104.210:81/transacts?from-date=2015-12-01&to-date=2015-12-02",
-					"method": "GET",
+					"url": "https://login.microsoftonline.com/124d38e1-fd5b-4382-87c5-0323f8b79b62/oauth2/token",
+					"method": "POST",
 					"headers": {
-						"auth": "Dias22gr3at"
+						"Content-type": "application/x-www-form-urlencoded"
 					},
-					"datasets": [
-						{
-							"referenceName": "Json1",
-							"type": "DatasetReference"
-						}
-					]
+					"body": "grant_type=client_credentials&client_secret=Np2APxLvWiUK_pszRHSrby0g1HHv95_H~k&client_id=http://demodwhaccount&resource=https://management.azure.com\n"
 				}
 			},
 			{
@@ -33,7 +28,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Web1",
+						"activity": "Fetch Token",
 						"dependencyConditions": [
 							"Succeeded"
 						]
