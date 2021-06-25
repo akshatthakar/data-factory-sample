@@ -1,0 +1,136 @@
+{
+	"name": "DelimitedText1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage2",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "sales_east.csv",
+				"container": "dlstorage"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Shop_Code",
+				"type": "String"
+			},
+			{
+				"name": "Shop_Name",
+				"type": "String"
+			},
+			{
+				"name": "TRANSDATE",
+				"type": "String"
+			},
+			{
+				"name": "TRANSTIME",
+				"type": "String"
+			},
+			{
+				"name": "TRANSNUM",
+				"type": "String"
+			},
+			{
+				"name": "SALE_TYPE",
+				"type": "String"
+			},
+			{
+				"name": "COMPANY",
+				"type": "String"
+			},
+			{
+				"name": "Compartment",
+				"type": "String"
+			},
+			{
+				"name": "SubCompartment",
+				"type": "String"
+			},
+			{
+				"name": "TYPE",
+				"type": "String"
+			},
+			{
+				"name": "nick_name",
+				"type": "String"
+			},
+			{
+				"name": "prod_code",
+				"type": "String"
+			},
+			{
+				"name": "Quantity",
+				"type": "String"
+			},
+			{
+				"name": "CST",
+				"type": "String"
+			},
+			{
+				"name": "Price",
+				"type": "String"
+			},
+			{
+				"name": "Unit_Price",
+				"type": "String"
+			},
+			{
+				"name": "CONCESSION_ID",
+				"type": "String"
+			},
+			{
+				"name": "CONCESSION_Code",
+				"type": "String"
+			},
+			{
+				"name": "CONCESSION_Description",
+				"type": "String"
+			},
+			{
+				"name": "Concession",
+				"type": "String"
+			},
+			{
+				"name": "Percent_Reduce",
+				"type": "String"
+			},
+			{
+				"name": "Price_Reduced",
+				"type": "String"
+			},
+			{
+				"name": "Amount",
+				"type": "String"
+			},
+			{
+				"name": "TAX_SLAB",
+				"type": "String"
+			},
+			{
+				"name": "TAXES1",
+				"type": "String"
+			},
+			{
+				"name": "TAXES2",
+				"type": "String"
+			},
+			{
+				"name": "emp_code",
+				"type": "String"
+			},
+			{
+				"name": "emp_Name",
+				"type": "String"
+			}
+		]
+	}
+}
