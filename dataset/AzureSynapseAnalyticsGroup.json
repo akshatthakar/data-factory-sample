@@ -1,0 +1,42 @@
+{
+	"name": "AzureSynapseAnalyticsGroup",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSynapseAnalytics1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [
+			{
+				"name": "GRP_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "GRP_NAME",
+				"type": "varchar"
+			},
+			{
+				"name": "SECTION",
+				"type": "varchar"
+			},
+			{
+				"name": "_inserted_dt",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "_updated_dt",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "sales",
+			"table": "DIM_GRP"
+		}
+	}
+}
