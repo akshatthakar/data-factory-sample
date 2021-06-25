@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Data flow3",
+				"name": "Data flow Compartment",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "dataflowemployee",
+						"referenceName": "dataflowcompartment",
 						"type": "DataFlowReference"
 					},
 					"staging": {
@@ -25,6 +25,99 @@
 							"type": "LinkedServiceReference"
 						},
 						"folderPath": "tmp"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "Data flow Concession",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "Data flow Compartment",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflowconcession",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "Data flow Shop",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "Data flow Concession",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflowstore",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "Data flow Product",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "Data flow Shop",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflowprod",
+						"type": "DataFlowReference"
 					},
 					"compute": {
 						"coreCount": 8,
