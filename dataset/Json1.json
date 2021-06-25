@@ -1,0 +1,118 @@
+{
+	"name": "Json1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "demo",
+				"container": "rawdata"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"result": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"Amount": {
+								"type": "string"
+							},
+							"COMPANY": {
+								"type": "string"
+							},
+							"CONCESSION_Code": {
+								"type": "null"
+							},
+							"CONCESSION_Description": {
+								"type": "null"
+							},
+							"CONCESSION_ID": {
+								"type": "integer"
+							},
+							"CST": {
+								"type": "string"
+							},
+							"Compartment": {
+								"type": "string"
+							},
+							"Concession": {
+								"type": "null"
+							},
+							"Percent_Reduce": {
+								"type": "null"
+							},
+							"Price": {
+								"type": "string"
+							},
+							"Price_Reduced": {
+								"type": "null"
+							},
+							"Quantity": {
+								"type": "integer"
+							},
+							"SALE_TYPE": {
+								"type": "string"
+							},
+							"Shop_Code": {
+								"type": "integer"
+							},
+							"Shop_Name": {
+								"type": "string"
+							},
+							"SubCompartment": {
+								"type": "string"
+							},
+							"TAXES1": {
+								"type": "number"
+							},
+							"TAXES2": {
+								"type": "null"
+							},
+							"TAX_SLAB": {
+								"type": "number"
+							},
+							"TRANSDATE": {
+								"type": "integer"
+							},
+							"TRANSNUM": {
+								"type": "integer"
+							},
+							"TRANSTIME": {
+								"type": "string"
+							},
+							"TRANSTIMESTR": {
+								"type": "string"
+							},
+							"TYPE": {
+								"type": "string"
+							},
+							"Unit_Price": {
+								"type": "string"
+							},
+							"emp_Name": {
+								"type": "string"
+							},
+							"emp_code": {
+								"type": "string"
+							},
+							"nick_name": {
+								"type": "string"
+							},
+							"prod_code": {
+								"type": "string"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

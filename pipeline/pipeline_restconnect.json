@@ -3,37 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Data flow1",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "Web1",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "1.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "dataflowrestconnect",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
 				"name": "Web1",
 				"type": "WebActivity",
 				"dependsOn": [],
@@ -50,7 +19,13 @@
 					"method": "GET",
 					"headers": {
 						"auth": "Dias22gr3at"
-					}
+					},
+					"datasets": [
+						{
+							"referenceName": "Json1",
+							"type": "DatasetReference"
+						}
+					]
 				}
 			}
 		],
