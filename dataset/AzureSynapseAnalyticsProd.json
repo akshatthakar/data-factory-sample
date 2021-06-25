@@ -1,0 +1,50 @@
+{
+	"name": "AzureSynapseAnalyticsProd",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSynapseAnalytics1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [
+			{
+				"name": "PROD_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "PROD_TYPE",
+				"type": "varchar"
+			},
+			{
+				"name": "PROD_NAME",
+				"type": "varchar"
+			},
+			{
+				"name": "PROD_CODE",
+				"type": "varchar"
+			},
+			{
+				"name": "LABEL_NAME",
+				"type": "varchar"
+			},
+			{
+				"name": "_inserted_dt",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "_updated_dt",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "sales",
+			"table": "DIM_PROD"
+		}
+	}
+}
