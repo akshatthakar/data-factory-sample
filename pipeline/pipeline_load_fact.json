@@ -1,0 +1,37 @@
+{
+	"name": "pipeline_load_fact",
+	"properties": {
+		"activities": [
+			{
+				"name": "Data flow3",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflowsales",
+						"type": "DataFlowReference"
+					},
+					"staging": {
+						"folderPath": "tmp"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2021-06-23T14:17:01Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
