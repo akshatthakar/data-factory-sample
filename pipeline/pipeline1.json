@@ -19,6 +19,13 @@
 						"referenceName": "dataflowprod",
 						"type": "DataFlowReference"
 					},
+					"staging": {
+						"linkedService": {
+							"referenceName": "AzureBlobStorage1",
+							"type": "LinkedServiceReference"
+						},
+						"folderPath": "tmp"
+					},
 					"compute": {
 						"coreCount": 8,
 						"computeType": "General"
