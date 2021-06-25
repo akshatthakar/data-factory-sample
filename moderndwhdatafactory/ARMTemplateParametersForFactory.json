@@ -10,6 +10,12 @@
 		},
 		"AzureSqlDatabase1_connectionString": {
 			"value": ""
+		},
+		"AzureSynapseAnalytics1_connectionString": {
+			"value": ""
+		},
+		"RestService_dumy_properties_typeProperties_url": {
+			"value": "http://20.84.104.210:81"
 		}
 	}
 }

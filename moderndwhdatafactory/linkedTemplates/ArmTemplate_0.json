@@ -14,6 +14,14 @@
 		"AzureSqlDatabase1_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase1'"
+		},
+		"AzureSynapseAnalytics1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSynapseAnalytics1'"
+		},
+		"RestService_dumy_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "http://20.84.104.210:81"
 		}
 	},
 	"variables": {
@@ -175,51 +183,38 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AzureSqlConcesssion')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
+			"name": "[concat(parameters('factoryName'), '/AzureSynapseAnalytics1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase1",
-					"type": "LinkedServiceReference"
-				},
 				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "CONS_ID",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "CONS_CODE",
-						"type": "varchar"
-					},
-					{
-						"name": "CONS_DESCRIPTION",
-						"type": "varchar"
-					},
-					{
-						"name": "_inserted_dt",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					},
-					{
-						"name": "_updated_dt",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					}
-				],
+				"type": "AzureSqlDW",
 				"typeProperties": {
-					"schema": "sales",
-					"table": "DIM_CONS"
+					"connectionString": "[parameters('AzureSynapseAnalytics1_connectionString')]"
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
-			]
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/RestService_dumy')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('RestService_dumy_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous",
+					"authHeaders": {
+						"auth": {
+							"type": "SecureString",
+							"value": "**********"
+						}
+					}
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/AzureSqlEmployee')]",
@@ -638,509 +633,432 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/dataflowcompartment')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
+			"name": "[concat(parameters('factoryName'), '/AzureSqlConcesssion')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "IntermediateCSV",
-								"type": "DatasetReference"
-							},
-							"name": "CSVSource"
-						},
-						{
-							"dataset": {
-								"referenceName": "AzureSqlGroup",
-								"type": "DatasetReference"
-							},
-							"name": "dwhdb"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "AzureSqlGroup",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "createHash"
-						},
-						{
-							"name": "Exists1"
-						},
-						{
-							"name": "Lookup1"
-						},
-						{
-							"name": "SetAttrributes"
-						},
-						{
-							"name": "Aggregate1"
-						},
-						{
-							"name": "CreateHashNewData"
-						},
-						{
-							"name": "AlterRow1"
-						}
-					],
-					"script": "source(output(\n\t\tStore_Code as integer,\n\t\tStore_Name as string,\n\t\tCOMPANY as string,\n\t\tCompartment as string,\n\t\tSubCompartment as string,\n\t\tTYPE as string,\n\t\tnick_name as string,\n\t\tprod_code as string,\n\t\tNetSold_Qty as short,\n\t\tCost as string,\n\t\tRetail_Price as string,\n\t\tUnit_Price_Sold as string,\n\t\tFinalPrice as boolean,\n\t\tCONCESSION_ID as integer,\n\t\tCONCESSION_Code as string,\n\t\tNew_Price_After_Discount as string,\n\t\tCONCESSION_Description as string,\n\t\tAmount_Discount as string,\n\t\tPercent_Discount as double,\n\t\tNetSold_Amount as string,\n\t\tTAX_RATE as double,\n\t\tTAX_AMOUNT1 as double,\n\t\tTAX_AMOUNT2 as double,\n\t\temp_code as string,\n\t\tEmp_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSVSource\nsource(output(\n\t\tGRP_ID as integer,\n\t\tGRP_NAME as string,\n\t\tSECTION as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> dwhdb\ndwhdb derive(dimhash = sha1(GRP_NAME+ SECTION)) ~> createHash\nCreateHashNewData, createHash exists(newdatahash == dimhash,\n\tnegate:true,\n\tbroadcast: 'auto')~> Exists1\nExists1, dwhdb lookup(toString(Compartment) == GRP_NAME,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nLookup1 derive(GRP_NAME = Compartment,\n\t\tSECTION = SubCompartment,\n\t\t{_inserted_dt} = iif(isNull(GRP_ID) ,  currentTimestamp(), {_inserted_dt}),\n\t\t{_updated_dt} = currentTimestamp()) ~> SetAttrributes\nSetAttrributes aggregate(groupBy(SECTION,\n\t\tGRP_NAME,\n\t\tGRP_ID,\n\t\t{_inserted_dt},\n\t\t{_updated_dt}),\n\tcount = count(SECTION)) ~> Aggregate1\nCSVSource derive(newdatahash = sha1(Compartment + SubCompartment)) ~> CreateHashNewData\nAggregate1 alterRow(insertIf(isNull(GRP_ID)),\n\tupdateIf(not(isNull(GRP_ID)))) ~> AlterRow1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tGRP_ID as integer,\n\t\tGRP_NAME as string,\n\t\tSECTION as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['GRP_NAME'],\n\tformat: 'table',\n\tstagingSchemaName: 'sales',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError',\n\tmapColumn(\n\t\tSECTION,\n\t\tGRP_NAME,\n\t\t{_inserted_dt},\n\t\t{_updated_dt}\n\t)) ~> sink1"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/IntermediateCSV')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSqlGroup')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dataflowconcession')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "IntermediateCSV",
-								"type": "DatasetReference"
-							},
-							"name": "CSVSource"
-						},
-						{
-							"dataset": {
-								"referenceName": "AzureSqlConcesssion",
-								"type": "DatasetReference"
-							},
-							"name": "dwhdb"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "AzureSqlConcesssion",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "createHash"
-						},
-						{
-							"name": "Exists1"
-						},
-						{
-							"name": "Lookup1"
-						},
-						{
-							"name": "SetAttrributes"
-						},
-						{
-							"name": "Aggregate1"
-						},
-						{
-							"name": "CreateHashNewData"
-						},
-						{
-							"name": "AlterRow1"
-						}
-					],
-					"script": "source(output(\n\t\tStore_Code as integer,\n\t\tStore_Name as string,\n\t\tCOMPANY as string,\n\t\tCompartment as string,\n\t\tSubCompartment as string,\n\t\tTYPE as string,\n\t\tnick_name as string,\n\t\tprod_code as string,\n\t\tNetSold_Qty as short,\n\t\tCost as string,\n\t\tRetail_Price as string,\n\t\tUnit_Price_Sold as string,\n\t\tFinalPrice as boolean,\n\t\tCONCESSION_ID as integer,\n\t\tCONCESSION_Code as string,\n\t\tNew_Price_After_Discount as string,\n\t\tCONCESSION_Description as string,\n\t\tAmount_Discount as string,\n\t\tPercent_Discount as double,\n\t\tNetSold_Amount as string,\n\t\tTAX_RATE as double,\n\t\tTAX_AMOUNT1 as double,\n\t\tTAX_AMOUNT2 as double,\n\t\temp_code as string,\n\t\tEmp_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSVSource\nsource(output(\n\t\tCONS_ID as integer,\n\t\tCONS_CODE as string,\n\t\tCONS_DESCRIPTION as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> dwhdb\ndwhdb derive(dimhash = sha1(CONS_CODE+ CONS_DESCRIPTION)) ~> createHash\nCreateHashNewData, createHash exists(newdatahash == dimhash,\n\tnegate:true,\n\tbroadcast: 'auto')~> Exists1\nExists1, dwhdb lookup(CONCESSION_Code == CONS_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nLookup1 derive(CONS_CODE = CONCESSION_Code,\n\t\tCONS_DESCRIPTION = CONCESSION_Description,\n\t\t{_inserted_dt} = iif(isNull(CONS_ID) ,  currentTimestamp(), {_inserted_dt}),\n\t\t{_updated_dt} = currentTimestamp()) ~> SetAttrributes\nSetAttrributes aggregate(groupBy(CONS_DESCRIPTION,\n\t\tCONS_CODE,\n\t\tCONS_ID,\n\t\t{_inserted_dt},\n\t\t{_updated_dt}),\n\tcount = count(CONS_DESCRIPTION)) ~> Aggregate1\nCSVSource derive(newdatahash = sha1(CONCESSION_Code + CONCESSION_Description)) ~> CreateHashNewData\nAggregate1 alterRow(insertIf(isNull(CONS_ID)),\n\tupdateIf(not(isNull(CONS_ID)))) ~> AlterRow1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tCONS_ID as integer,\n\t\tCONS_CODE as string,\n\t\tCONS_DESCRIPTION as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['CONS_CODE'],\n\tformat: 'table',\n\tstagingSchemaName: 'sales',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError',\n\tmapColumn(\n\t\tCONS_DESCRIPTION,\n\t\tCONS_CODE,\n\t\t{_inserted_dt},\n\t\t{_updated_dt}\n\t)) ~> sink1"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/IntermediateCSV')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSqlConcesssion')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dataflowemployee')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "IntermediateCSV",
-								"type": "DatasetReference"
-							},
-							"name": "CSVSource"
-						},
-						{
-							"dataset": {
-								"referenceName": "AzureSqlEmployee",
-								"type": "DatasetReference"
-							},
-							"name": "dwhdb"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "AzureSqlEmployee",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "createHash"
-						},
-						{
-							"name": "Exists1"
-						},
-						{
-							"name": "Lookup1"
-						},
-						{
-							"name": "SetAttrributes"
-						},
-						{
-							"name": "Aggregate1"
-						},
-						{
-							"name": "CreateHashNewData"
-						},
-						{
-							"name": "AlterRow1"
-						}
-					],
-					"script": "source(output(\n\t\tStore_Code as integer,\n\t\tStore_Name as string,\n\t\tCOMPANY as string,\n\t\tCompartment as string,\n\t\tSubCompartment as string,\n\t\tTYPE as string,\n\t\tnick_name as string,\n\t\tprod_code as string,\n\t\tNetSold_Qty as short,\n\t\tCost as string,\n\t\tRetail_Price as string,\n\t\tUnit_Price_Sold as string,\n\t\tFinalPrice as boolean,\n\t\tCONCESSION_ID as integer,\n\t\tCONCESSION_Code as string,\n\t\tNew_Price_After_Discount as string,\n\t\tCONCESSION_Description as string,\n\t\tAmount_Discount as string,\n\t\tPercent_Discount as double,\n\t\tNetSold_Amount as string,\n\t\tTAX_RATE as double,\n\t\tTAX_AMOUNT1 as double,\n\t\tTAX_AMOUNT2 as double,\n\t\temp_code as string,\n\t\tEmp_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSVSource\nsource(output(\n\t\tEMP_ID as integer,\n\t\tEMP_CODE as string,\n\t\tEMP_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> dwhdb\ndwhdb derive(dimhash = sha1(EMP_CODE+EMP_NAME)) ~> createHash\nCreateHashNewData, createHash exists(newdatahash == dimhash,\n\tnegate:true,\n\tbroadcast: 'auto')~> Exists1\nExists1, dwhdb lookup(CSVSource@emp_code == dwhdb@EMP_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nLookup1 derive(EMP_CODE = CSVSource@emp_code,\n\t\tEMP_NAME = CSVSource@Emp_Name,\n\t\t{_inserted_dt} = iif(isNull(EMP_ID) ,  currentTimestamp(), {_inserted_dt}),\n\t\t{_updated_dt} = currentTimestamp()) ~> SetAttrributes\nSetAttrributes aggregate(groupBy(SetAttrributes@EMP_NAME,\n\t\tSetAttrributes@EMP_CODE,\n\t\tEMP_ID,\n\t\t{_inserted_dt},\n\t\t{_updated_dt}),\n\tcount = count(SetAttrributes@EMP_NAME)) ~> Aggregate1\nCSVSource derive(newdatahash = sha1(emp_code + Emp_Name)) ~> CreateHashNewData\nAggregate1 alterRow(insertIf(isNull(EMP_ID)),\n\tupdateIf(not(isNull(EMP_ID)))) ~> AlterRow1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tEMP_ID as integer,\n\t\tEMP_CODE as string,\n\t\tEMP_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['EMP_CODE'],\n\tformat: 'table',\n\tstagingSchemaName: 'sales',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError',\n\tmapColumn(\n\t\tEMP_CODE = EMP_NAME,\n\t\tEMP_NAME = EMP_CODE,\n\t\t{_inserted_dt},\n\t\t{_updated_dt}\n\t)) ~> sink1"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/IntermediateCSV')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSqlEmployee')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dataflowprod')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "IntermediateCSV",
-								"type": "DatasetReference"
-							},
-							"name": "CSVSource"
-						},
-						{
-							"dataset": {
-								"referenceName": "AzureSqlProduct",
-								"type": "DatasetReference"
-							},
-							"name": "dwhdb"
-						},
-						{
-							"dataset": {
-								"referenceName": "AzureSqlProduct",
-								"type": "DatasetReference"
-							},
-							"name": "dwhdbStore"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "AzureSqlProduct",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "createHash"
-						},
-						{
-							"name": "Exists1"
-						},
-						{
-							"name": "Lookup1"
-						},
-						{
-							"name": "SetAttrributes"
-						},
-						{
-							"name": "Aggregate1"
-						},
-						{
-							"name": "CreateHashNewData"
-						},
-						{
-							"name": "AlterRow1"
-						}
-					],
-					"script": "source(output(\n\t\tStore_Code as integer,\n\t\tStore_Name as string,\n\t\tCOMPANY as string,\n\t\tCompartment as string,\n\t\tSubCompartment as string,\n\t\tTYPE as string,\n\t\tnick_name as string,\n\t\tprod_code as string,\n\t\tNetSold_Qty as short,\n\t\tCost as string,\n\t\tRetail_Price as string,\n\t\tUnit_Price_Sold as string,\n\t\tFinalPrice as boolean,\n\t\tCONCESSION_ID as integer,\n\t\tCONCESSION_Code as string,\n\t\tNew_Price_After_Discount as string,\n\t\tCONCESSION_Description as string,\n\t\tAmount_Discount as string,\n\t\tPercent_Discount as double,\n\t\tNetSold_Amount as string,\n\t\tTAX_RATE as double,\n\t\tTAX_AMOUNT1 as double,\n\t\tTAX_AMOUNT2 as double,\n\t\temp_code as string,\n\t\tEmp_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSVSource\nsource(output(\n\t\tPROD_ID as integer,\n\t\tPROD_TYPE as string,\n\t\tPROD_NAME as string,\n\t\tPROD_CODE as string,\n\t\tLABEL_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> dwhdb\nsource(output(\n\t\tPROD_ID as integer,\n\t\tPROD_TYPE as string,\n\t\tPROD_NAME as string,\n\t\tPROD_CODE as string,\n\t\tLABEL_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> dwhdbStore\ndwhdb derive(dimhash = sha1(PROD_NAME+ PROD_CODE)) ~> createHash\nCreateHashNewData, createHash exists(newdatahash == dimhash,\n\tnegate:true,\n\tbroadcast: 'auto')~> Exists1\nExists1, dwhdbStore lookup(toString(CSVSource@prod_code) == dwhdbStore@PROD_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nLookup1 derive(PROD_CODE = CSVSource@prod_code,\n\t\tPROD_NAME = nick_name,\n\t\tPROD_TYPE = TYPE,\n\t\t{_updated_dt} = currentTimestamp(),\n\t\tLABEL_NAME = COMPANY,\n\t\t{_inserted_dt} = iif(isNull(PROD_ID) ,  currentTimestamp(), {_inserted_dt})) ~> SetAttrributes\nSetAttrributes aggregate(groupBy(PROD_ID,\n\t\tPROD_TYPE,\n\t\tPROD_NAME,\n\t\tSetAttrributes@PROD_CODE,\n\t\tLABEL_NAME,\n\t\t{_inserted_dt},\n\t\t{_updated_dt}),\n\tcount = count(SetAttrributes@PROD_CODE)) ~> Aggregate1\nCSVSource derive(newdatahash = sha1(nick_name+ toString(prod_code))) ~> CreateHashNewData\nAggregate1 alterRow(updateIf(not(isNull(PROD_ID))),\n\tinsertIf(isNull(PROD_ID))) ~> AlterRow1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tPROD_ID as integer,\n\t\tPROD_TYPE as string,\n\t\tPROD_NAME as string,\n\t\tPROD_CODE as string,\n\t\tLABEL_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['PROD_NAME'],\n\tformat: 'table',\n\tstagingSchemaName: 'sales',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError',\n\tmapColumn(\n\t\tPROD_NAME,\n\t\tPROD_TYPE,\n\t\tPROD_CODE,\n\t\tLABEL_NAME,\n\t\t{_inserted_dt},\n\t\t{_updated_dt}\n\t)) ~> sink1"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/IntermediateCSV')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSqlProduct')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dataflowrestconnect')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "rest_Json",
-								"type": "DatasetReference"
-							},
-							"name": "source1"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "IntermediateCSV",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "Flatten1"
-						},
-						{
-							"name": "DerivedColumn1"
-						}
-					],
-					"script": "source(output(\n\t\tresult as (Amount as string, COMPANY as string, CONCESSION_Code as string, CONCESSION_Description as string, CONCESSION_ID as integer, CST as string, Compartment as string, Concession as string, Percent_Reduce as double, Price as string, Price_Reduced as string, Quantity as short, SALE_TYPE as string, Shop_Code as string, Shop_Name as string, SubCompartment as string, TAXES1 as double, TAXES2 as double, TAX_SLAB as double, TRANSDATE as long, TRANSNUM as short, TRANSTIME as integer, TRANSTIMESTR as integer, TYPE as string, Unit_Price as string, emp_Name as string, emp_code as string, nick_name as string, prod_code as string)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'singleDocument') ~> source1\nsource1 foldDown(unroll(result),\n\tmapColumn(\n\t\tresult\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten1\nFlatten1 derive(Shop_Code = result.Shop_Code,\n\t\tShop_Name = result.Shop_Name,\n\t\tCOMPANY = result.COMPANY,\n\t\tCompartment = result.Compartment,\n\t\tSubCompartment = result.SubCompartment,\n\t\tTYPE = result.TYPE,\n\t\tnick_name = result.nick_name,\n\t\tprod_code = result.prod_code,\n\t\tQuantity = result.Quantity,\n\t\tCST = result.CST,\n\t\tPrice = result.Price,\n\t\tUnit_Price = result.Unit_Price,\n\t\tPriceOverride = 0,\n\t\tCONCESSION_ID = result.CONCESSION_ID,\n\t\tCONCESSION_Code = result.CONCESSION_Code,\n\t\tPrice_Reduced = result.Price_Reduced,\n\t\tCONCESSION_Description = result.CONCESSION_Description,\n\t\tConcession = result.Concession,\n\t\tPercent_Reduce = result.Percent_Reduce,\n\t\tAmount = result.Amount,\n\t\tTAX_SLAB = result.TAX_SLAB,\n\t\tTAXES1 = result.TAXES1,\n\t\tTAXES2 = result.TAXES2,\n\t\temp_code = result.emp_Name,\n\t\tEmp_Name = result.emp_Name,\n\t\tTRANSDATE = result.TRANSDATE,\n\t\tTRANSTIME = result.TRANSTIME,\n\t\tTRANSNUM = result.TRANSNUM) ~> DerivedColumn1\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tjson_value as string\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tCOMPANY,\n\t\tShop_Code,\n\t\tShop_Name,\n\t\tCompartment,\n\t\tSubCompartment,\n\t\tTYPE,\n\t\tnick_name,\n\t\tprod_code,\n\t\tquantity = Quantity,\n\t\tCST,\n\t\tPrice,\n\t\tUnit_Price,\n\t\tCONCESSION_ID,\n\t\tCONCESSION_Code,\n\t\tPrice_Reduced,\n\t\tCONCESSION_Description,\n\t\tConcession,\n\t\tPercent_Reduce,\n\t\tAmount,\n\t\tTAX_SLAB,\n\t\tTAXES1,\n\t\tTAXES2,\n\t\temp_code,\n\t\tEmp_Name,\n\t\tTRANSDATE,\n\t\tTRANSTIME,\n\t\tTRANSNUM\n\t)) ~> sink1"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/rest_Json')]",
-				"[concat(variables('factoryId'), '/datasets/IntermediateCSV')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dataflowsales')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "IntermediateCSV",
-								"type": "DatasetReference"
-							},
-							"name": "CSVSource"
-						},
-						{
-							"dataset": {
-								"referenceName": "AzureSqlShop",
-								"type": "DatasetReference"
-							},
-							"name": "ShopDim"
-						},
-						{
-							"dataset": {
-								"referenceName": "AzureSqlEmployee",
-								"type": "DatasetReference"
-							},
-							"name": "EmployeeDim"
-						},
-						{
-							"dataset": {
-								"referenceName": "AzureSqlProduct",
-								"type": "DatasetReference"
-							},
-							"name": "ProductDim"
-						},
-						{
-							"dataset": {
-								"referenceName": "AzureSqlGroup",
-								"type": "DatasetReference"
-							},
-							"name": "GroupDim"
-						},
-						{
-							"dataset": {
-								"referenceName": "AzureSqlConcesssion",
-								"type": "DatasetReference"
-							},
-							"name": "ConcessionDim"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "SalesBlob",
-								"type": "DatasetReference"
-							},
-							"name": "sinksalesblob"
-						}
-					],
-					"transformations": [
-						{
-							"name": "LookupShop"
-						},
-						{
-							"name": "SetAttrributes"
-						},
-						{
-							"name": "LookupEmployee"
-						},
-						{
-							"name": "LookupProduct"
-						},
-						{
-							"name": "LookupGroup"
-						},
-						{
-							"name": "LookupConcession"
-						}
-					],
-					"script": "source(output(\n\t\tCOMPANY as string,\n\t\tShop_Code as integer,\n\t\tShop_Name as string,\n\t\tCompartment as string,\n\t\tSubCompartment as string,\n\t\tTYPE as string,\n\t\tnick_name as string,\n\t\tprod_code as string,\n\t\tquantity as short,\n\t\tCST as string,\n\t\tPrice as string,\n\t\tUnit_Price as string,\n\t\tCONCESSION_ID as integer,\n\t\tCONCESSION_Code as string,\n\t\tPrice_Reduced as string,\n\t\tCONCESSION_Description as string,\n\t\tConcession as string,\n\t\tPercent_Reduce as double,\n\t\tAmount as string,\n\t\tTAX_SLAB as double,\n\t\tTAXES1 as double,\n\t\tTAXES2 as double,\n\t\temp_code as string,\n\t\tEmp_Name as string,\n\t\tTRANSDATE as long,\n\t\tTRANSTIME as integer,\n\t\tTRANSNUM as short\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSVSource\nsource(output(\n\t\tPOS_ID as integer,\n\t\tPOS_CODE as string,\n\t\tPOS_LABEL as string,\n\t\tDISTRICT as string,\n\t\tBLOCK as string,\n\t\tREGION as string,\n\t\tTIER as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> ShopDim\nsource(output(\n\t\tEMP_ID as integer,\n\t\tEMP_CODE as string,\n\t\tEMP_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> EmployeeDim\nsource(output(\n\t\tPROD_ID as integer,\n\t\tPROD_TYPE as string,\n\t\tPROD_NAME as string,\n\t\tPROD_CODE as string,\n\t\tLABEL_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> ProductDim\nsource(output(\n\t\tGRP_ID as integer,\n\t\tGRP_NAME as string,\n\t\tSECTION as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> GroupDim\nsource(output(\n\t\tCONS_ID as integer,\n\t\tCONS_CODE as string,\n\t\tCONS_DESCRIPTION as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> ConcessionDim\nCSVSource, ShopDim lookup(toString(Shop_Code) == POS_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupShop\nLookupConcession derive(POS_ID = POS_ID,\n\t\tEMP_ID = EMP_ID,\n\t\t{_inserted_dt} = currentTimestamp(),\n\t\tCONCESSION_ID = CONCESSION_ID,\n\t\tGRP_ID = GRP_ID,\n\t\tPROD_ID = PROD_ID,\n\t\tQuantity = quantity,\n\t\tCST = CST,\n\t\tUnit_Price = Unit_Price,\n\t\tPrice = Price,\n\t\tAmount = Amount,\n\t\tTRANSDATETIME = toTimestamp(TRANSDATE),\n\t\tTRANSTIME = TRANSTIME,\n\t\tTRANSNUM = TRANSNUM,\n\t\tTAXES1 = TAXES1,\n\t\tTAXES2 = TAXES2,\n\t\tTAX_SLAB = TAX_SLAB) ~> SetAttrributes\nLookupShop, EmployeeDim lookup(CSVSource@emp_code == EmployeeDim@EMP_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupEmployee\nLookupEmployee, ProductDim lookup(CSVSource@prod_code == ProductDim@PROD_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupProduct\nLookupProduct, GroupDim lookup(Compartment == GRP_NAME,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupGroup\nLookupGroup, ConcessionDim lookup(CONCESSION_Code == CONS_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupConcession\nSetAttrributes sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:[(concat(concat('sales-',concat(concat(concat(concat (toString(dayOfMonth(  currentUTC('GMT'))) , '-' ),  toString(month(currentUTC('GMT')))), '-'), toString( year(currentUTC('GMT'))))), '.csv'))],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tEMP_ID,\n\t\t{_inserted_dt},\n\t\tCONCESSION_ID,\n\t\tGRP_ID,\n\t\tPROD_ID,\n\t\tQuantity,\n\t\tCost = CST,\n\t\tUnit_Price,\n\t\tPrice,\n\t\tAmount,\n\t\tTRANSDATETIME,\n\t\tTRANSTIME,\n\t\tTRANSNUM,\n\t\tTAXES1,\n\t\tTAXES2,\n\t\tTAX_SLAB,\n\t\tPOS_ID\n\t),\n\tpartitionBy('hash', 1)) ~> sinksalesblob"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/IntermediateCSV')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSqlShop')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSqlEmployee')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSqlProduct')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSqlGroup')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSqlConcesssion')]",
-				"[concat(variables('factoryId'), '/datasets/SalesBlob')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dataflowstore')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "IntermediateCSV",
-								"type": "DatasetReference"
-							},
-							"name": "CSVSource"
-						},
-						{
-							"dataset": {
-								"referenceName": "AzureSqlShop",
-								"type": "DatasetReference"
-							},
-							"name": "dwhdb"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "SalesBlob",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "createHash"
-						},
-						{
-							"name": "Exists1"
-						},
-						{
-							"name": "Lookup1"
-						},
-						{
-							"name": "SetAttrributes"
-						},
-						{
-							"name": "Aggregate1"
-						},
-						{
-							"name": "CreateHashNewData"
-						},
-						{
-							"name": "AlterRow1"
-						}
-					],
-					"script": "source(output(\n\t\tStore_Code as integer,\n\t\tStore_Name as string,\n\t\tCOMPANY as string,\n\t\tCompartment as string,\n\t\tSubCompartment as string,\n\t\tTYPE as string,\n\t\tnick_name as string,\n\t\tprod_code as string,\n\t\tNetSold_Qty as short,\n\t\tCost as string,\n\t\tRetail_Price as string,\n\t\tUnit_Price_Sold as string,\n\t\tFinalPrice as boolean,\n\t\tCONCESSION_ID as integer,\n\t\tCONCESSION_Code as string,\n\t\tNew_Price_After_Discount as string,\n\t\tCONCESSION_Description as string,\n\t\tAmount_Discount as string,\n\t\tPercent_Discount as double,\n\t\tNetSold_Amount as string,\n\t\tTAX_RATE as double,\n\t\tTAX_AMOUNT1 as double,\n\t\tTAX_AMOUNT2 as double,\n\t\temp_code as string,\n\t\tEmp_Name as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSVSource\nsource(output(\n\t\tPOS_ID as integer,\n\t\tPOS_CODE as string,\n\t\tPOS_LABEL as string,\n\t\tDISTRICT as string,\n\t\tBLOCK as string,\n\t\tREGION as string,\n\t\tTIER as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> dwhdb\ndwhdb derive(dimhash = sha1(POS_CODE+ POS_LABEL)) ~> createHash\nCreateHashNewData, createHash exists(newdatahash == dimhash,\n\tnegate:true,\n\tbroadcast: 'auto')~> Exists1\nExists1, dwhdb lookup(toString(Store_Code) == POS_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nLookup1 derive(POS_LABEL = Store_Name,\n\t\tPOS_CODE = Store_Code,\n\t\t{_inserted_dt} = iif(isNull(POS_ID) ,  currentTimestamp(), {_inserted_dt}),\n\t\t{_updated_dt} = currentTimestamp()) ~> SetAttrributes\nSetAttrributes aggregate(groupBy(POS_CODE,\n\t\tPOS_LABEL,\n\t\tPOS_ID,\n\t\t{_inserted_dt},\n\t\t{_updated_dt}),\n\tcount = count(POS_CODE)) ~> Aggregate1\nCSVSource derive(newdatahash = sha1(toString(Store_Code) + Store_Name)) ~> CreateHashNewData\nAggregate1 alterRow(insertIf(isNull(POS_ID)),\n\tupdateIf(not(isNull(POS_ID)))) ~> AlterRow1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tPOS_CODE,\n\t\tPOS_LABEL,\n\t\t{_inserted_dt},\n\t\t{_updated_dt}\n\t)) ~> sink1"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/IntermediateCSV')]",
-				"[concat(variables('factoryId'), '/datasets/AzureSqlShop')]",
-				"[concat(variables('factoryId'), '/datasets/SalesBlob')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pipeline_load_dim')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
 					{
-						"name": "Data flow3",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "1.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "dataflowsales",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"CSVSource": {},
-									"ShopDim": {},
-									"EmployeeDim": {},
-									"ProductDim": {},
-									"GroupDim": {},
-									"ConcessionDim": {},
-									"sinksalesblob": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
+						"name": "CONS_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "CONS_CODE",
+						"type": "varchar"
+					},
+					{
+						"name": "CONS_DESCRIPTION",
+						"type": "varchar"
+					},
+					{
+						"name": "_inserted_dt",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "_updated_dt",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
 					}
 				],
-				"annotations": [],
-				"lastPublishTime": "2021-06-23T14:17:01Z"
+				"typeProperties": {
+					"schema": "sales",
+					"table": "DIM_CONS"
+				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/dataflowsales')]"
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSynapseConcession')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSynapseAnalytics1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "CONS_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "CONS_CODE",
+						"type": "varchar"
+					},
+					{
+						"name": "CONS_DESCRIPTION",
+						"type": "varchar"
+					},
+					{
+						"name": "_inserted_dt",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "_updated_dt",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "sales",
+					"table": "DIM_CONS"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSynapseAnalytics1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSynapseEmployee')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSynapseAnalytics1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "EMP_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "EMP_CODE",
+						"type": "varchar"
+					},
+					{
+						"name": "EMP_NAME",
+						"type": "varchar"
+					},
+					{
+						"name": "_inserted_dt",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "_updated_dt",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "sales",
+					"table": "DIM_EMP"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSynapseAnalytics1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSynapseAnalyticsGroup')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSynapseAnalytics1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "GRP_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "GRP_NAME",
+						"type": "varchar"
+					},
+					{
+						"name": "SECTION",
+						"type": "varchar"
+					},
+					{
+						"name": "_inserted_dt",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "_updated_dt",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "sales",
+					"table": "DIM_GRP"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSynapseAnalytics1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSynapseAnalyticsShop')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSynapseAnalytics1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "POS_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "POS_CODE",
+						"type": "varchar"
+					},
+					{
+						"name": "POS_LABEL",
+						"type": "varchar"
+					},
+					{
+						"name": "DISTRICT",
+						"type": "varchar"
+					},
+					{
+						"name": "BLOCK",
+						"type": "varchar"
+					},
+					{
+						"name": "REGION",
+						"type": "varchar"
+					},
+					{
+						"name": "TIER",
+						"type": "varchar"
+					},
+					{
+						"name": "_inserted_dt",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "_updated_dt",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "sales",
+					"table": "DIM_POS"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSynapseAnalytics1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSynapseAnalyticsProd')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSynapseAnalytics1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "PROD_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PROD_TYPE",
+						"type": "varchar"
+					},
+					{
+						"name": "PROD_NAME",
+						"type": "varchar"
+					},
+					{
+						"name": "PROD_CODE",
+						"type": "varchar"
+					},
+					{
+						"name": "LABEL_NAME",
+						"type": "varchar"
+					},
+					{
+						"name": "_inserted_dt",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "_updated_dt",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "sales",
+					"table": "DIM_PROD"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSynapseAnalytics1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Json1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "demo",
+						"container": "rawdata"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"result": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"Amount": {
+										"type": "string"
+									},
+									"COMPANY": {
+										"type": "string"
+									},
+									"CONCESSION_Code": {
+										"type": "null"
+									},
+									"CONCESSION_Description": {
+										"type": "null"
+									},
+									"CONCESSION_ID": {
+										"type": "integer"
+									},
+									"CST": {
+										"type": "string"
+									},
+									"Compartment": {
+										"type": "string"
+									},
+									"Concession": {
+										"type": "null"
+									},
+									"Percent_Reduce": {
+										"type": "null"
+									},
+									"Price": {
+										"type": "string"
+									},
+									"Price_Reduced": {
+										"type": "null"
+									},
+									"Quantity": {
+										"type": "integer"
+									},
+									"SALE_TYPE": {
+										"type": "string"
+									},
+									"Shop_Code": {
+										"type": "integer"
+									},
+									"Shop_Name": {
+										"type": "string"
+									},
+									"SubCompartment": {
+										"type": "string"
+									},
+									"TAXES1": {
+										"type": "number"
+									},
+									"TAXES2": {
+										"type": "null"
+									},
+									"TAX_SLAB": {
+										"type": "number"
+									},
+									"TRANSDATE": {
+										"type": "integer"
+									},
+									"TRANSNUM": {
+										"type": "integer"
+									},
+									"TRANSTIME": {
+										"type": "string"
+									},
+									"TRANSTIMESTR": {
+										"type": "string"
+									},
+									"TYPE": {
+										"type": "string"
+									},
+									"Unit_Price": {
+										"type": "string"
+									},
+									"emp_Name": {
+										"type": "string"
+									},
+									"emp_code": {
+										"type": "string"
+									},
+									"nick_name": {
+										"type": "string"
+									},
+									"prod_code": {
+										"type": "string"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
 			]
 		}
 	]
