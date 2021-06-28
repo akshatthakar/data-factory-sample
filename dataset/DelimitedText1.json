@@ -11,7 +11,7 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"fileName": "sales_east.csv",
-				"container": "dlstorage"
+				"container": "source"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
