@@ -92,6 +92,10 @@
 				"type": "String"
 			},
 			{
+				"name": "Amount",
+				"type": "String"
+			},
+			{
 				"name": "TAX_SLAB",
 				"type": "String"
 			},
