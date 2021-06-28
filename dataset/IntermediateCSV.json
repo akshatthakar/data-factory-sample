@@ -18,7 +18,112 @@
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
 		},
-		"schema": []
+		"schema": [
+			{
+				"name": "COMPANY",
+				"type": "String"
+			},
+			{
+				"name": "Shop_Code",
+				"type": "String"
+			},
+			{
+				"name": "Shop_Name",
+				"type": "String"
+			},
+			{
+				"name": "Compartment",
+				"type": "String"
+			},
+			{
+				"name": "SubCompartment",
+				"type": "String"
+			},
+			{
+				"name": "TYPE",
+				"type": "String"
+			},
+			{
+				"name": "nick_name",
+				"type": "String"
+			},
+			{
+				"name": "prod_code",
+				"type": "String"
+			},
+			{
+				"name": "quantity",
+				"type": "String"
+			},
+			{
+				"name": "CST",
+				"type": "String"
+			},
+			{
+				"name": "Price",
+				"type": "String"
+			},
+			{
+				"name": "Unit_Price",
+				"type": "String"
+			},
+			{
+				"name": "CONCESSION_ID",
+				"type": "String"
+			},
+			{
+				"name": "CONCESSION_Code",
+				"type": "String"
+			},
+			{
+				"name": "Price_Reduced",
+				"type": "String"
+			},
+			{
+				"name": "CONCESSION_Description",
+				"type": "String"
+			},
+			{
+				"name": "Concession",
+				"type": "String"
+			},
+			{
+				"name": "Percent_Reduce",
+				"type": "String"
+			},
+			{
+				"name": "TAX_SLAB",
+				"type": "String"
+			},
+			{
+				"name": "TAXES1",
+				"type": "String"
+			},
+			{
+				"name": "TAXES2",
+				"type": "String"
+			},
+			{
+				"name": "emp_code",
+				"type": "String"
+			},
+			{
+				"name": "Emp_Name",
+				"type": "String"
+			},
+			{
+				"name": "TRANSDATE",
+				"type": "String"
+			},
+			{
+				"name": "TRANSTIME",
+				"type": "String"
+			},
+			{
+				"name": "TRANSNUM",
+				"type": "String"
+			}
+		]
 	},
 	"type": "Microsoft.DataFactory/factories/datasets"
 }
