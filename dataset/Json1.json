@@ -10,6 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"fileName": "rest_output.json",
 				"folderPath": "demo",
 				"container": "rawdata"
 			}
