@@ -12,18 +12,38 @@
 					"name": "CSVSource"
 				},
 				{
+					"dataset": {
+						"referenceName": "AzureSynapseAnalyticsShop",
+						"type": "DatasetReference"
+					},
 					"name": "ShopDim"
 				},
 				{
+					"dataset": {
+						"referenceName": "AzureSynapseEmployee",
+						"type": "DatasetReference"
+					},
 					"name": "EmployeeDim"
 				},
 				{
+					"dataset": {
+						"referenceName": "AzureSynapseAnalyticsProd",
+						"type": "DatasetReference"
+					},
 					"name": "ProductDim"
 				},
 				{
+					"dataset": {
+						"referenceName": "AzureSynapseAnalyticsGroup",
+						"type": "DatasetReference"
+					},
 					"name": "GroupDim"
 				},
 				{
+					"dataset": {
+						"referenceName": "AzureSynapseConcession",
+						"type": "DatasetReference"
+					},
 					"name": "ConcessionDim"
 				}
 			],
@@ -56,7 +76,7 @@
 					"name": "LookupConcession"
 				}
 			],
-			"script": "source(output(\n\t\tCOMPANY as string,\n\t\tShop_Code as string,\n\t\tShop_Name as string,\n\t\tCompartment as string,\n\t\tSubCompartment as string,\n\t\tTYPE as string,\n\t\tnick_name as string,\n\t\tprod_code as string,\n\t\tquantity as string,\n\t\tCST as string,\n\t\tPrice as string,\n\t\tUnit_Price as string,\n\t\tCONCESSION_ID as string,\n\t\tCONCESSION_Code as string,\n\t\tPrice_Reduced as string,\n\t\tCONCESSION_Description as string,\n\t\tConcession as string,\n\t\tPercent_Reduce as string,\n\t\tAmount as string,\n\t\tTAX_SLAB as string,\n\t\tTAXES1 as string,\n\t\tTAXES2 as string,\n\t\temp_code as string,\n\t\tEmp_Name as string,\n\t\tTRANSDATE as string,\n\t\tTRANSTIME as string,\n\t\tTRANSNUM as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSVSource\nsource(output(\n\t\tPOS_ID as integer,\n\t\tPOS_CODE as string,\n\t\tPOS_LABEL as string,\n\t\tDISTRICT as string,\n\t\tBLOCK as string,\n\t\tREGION as string,\n\t\tTIER as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> ShopDim\nsource(output(\n\t\tEMP_ID as integer,\n\t\tEMP_CODE as string,\n\t\tEMP_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> EmployeeDim\nsource(output(\n\t\tPROD_ID as integer,\n\t\tPROD_TYPE as string,\n\t\tPROD_NAME as string,\n\t\tPROD_CODE as string,\n\t\tLABEL_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> ProductDim\nsource(output(\n\t\tGRP_ID as integer,\n\t\tGRP_NAME as string,\n\t\tSECTION as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> GroupDim\nsource(output(\n\t\tCONS_ID as integer,\n\t\tCONS_CODE as string,\n\t\tCONS_DESCRIPTION as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false) ~> ConcessionDim\nCSVSource, ShopDim lookup(toString(Shop_Code) == POS_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupShop\nLookupConcession derive(POS_ID = POS_ID,\n\t\tEMP_ID = EMP_ID,\n\t\t{_inserted_dt} = currentTimestamp(),\n\t\tCONCESSION_ID = CONS_ID,\n\t\tGRP_ID = GRP_ID,\n\t\tPROD_ID = PROD_ID,\n\t\tQuantity = quantity,\n\t\tCST = CST,\n\t\tUnit_Price = Unit_Price,\n\t\tPrice = Price,\n\t\tAmount = Amount,\n\t\tTRANSDATETIME = toTimestamp(TRANSDATE),\n\t\tTRANSTIME = TRANSTIME,\n\t\tTRANSNUM = TRANSNUM,\n\t\tTAXES1 = TAXES1,\n\t\tTAXES2 = TAXES2,\n\t\tTAX_SLAB = TAX_SLAB) ~> SetAttrributes\nLookupShop, EmployeeDim lookup(CSVSource@emp_code == EmployeeDim@EMP_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupEmployee\nLookupEmployee, ProductDim lookup(CSVSource@prod_code == ProductDim@PROD_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupProduct\nLookupProduct, GroupDim lookup(Compartment == GRP_NAME,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupGroup\nLookupGroup, ConcessionDim lookup(CONCESSION_Code == CONS_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupConcession\nSetAttrributes sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:[(concat(concat('sales-',concat(concat(concat(concat (toString(dayOfMonth(  currentUTC('GMT'))) , '-' ),  toString(month(currentUTC('GMT')))), '-'), toString( year(currentUTC('GMT'))))), '.csv'))],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tEMP_ID,\n\t\t{_inserted_dt},\n\t\tCONS_ID = CONCESSION_ID,\n\t\tGRP_ID,\n\t\tPROD_ID,\n\t\tQuantity,\n\t\tCost = CST,\n\t\tUnit_Price,\n\t\tPrice,\n\t\tAmount,\n\t\tTRANSDATETIME,\n\t\tTRANSTIME,\n\t\tTRANSNUM,\n\t\tTAXES1,\n\t\tTAXES2,\n\t\tTAX_SLAB,\n\t\tPOS_ID\n\t),\n\tpartitionBy('hash', 1)) ~> sinksalesblob"
+			"script": "source(output(\n\t\tCOMPANY as string,\n\t\tShop_Code as string,\n\t\tShop_Name as string,\n\t\tCompartment as string,\n\t\tSubCompartment as string,\n\t\tTYPE as string,\n\t\tnick_name as string,\n\t\tprod_code as string,\n\t\tquantity as string,\n\t\tCST as string,\n\t\tPrice as string,\n\t\tUnit_Price as string,\n\t\tCONCESSION_ID as string,\n\t\tCONCESSION_Code as string,\n\t\tPrice_Reduced as string,\n\t\tCONCESSION_Description as string,\n\t\tConcession as string,\n\t\tPercent_Reduce as string,\n\t\tAmount as string,\n\t\tTAX_SLAB as string,\n\t\tTAXES1 as string,\n\t\tTAXES2 as string,\n\t\temp_code as string,\n\t\tEmp_Name as string,\n\t\tTRANSDATE as string,\n\t\tTRANSTIME as string,\n\t\tTRANSNUM as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> CSVSource\nsource(output(\n\t\tPOS_ID as integer,\n\t\tPOS_CODE as string,\n\t\tPOS_LABEL as string,\n\t\tDISTRICT as string,\n\t\tBLOCK as string,\n\t\tREGION as string,\n\t\tTIER as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> ShopDim\nsource(output(\n\t\tEMP_ID as integer,\n\t\tEMP_CODE as string,\n\t\tEMP_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> EmployeeDim\nsource(output(\n\t\tPROD_ID as integer,\n\t\tPROD_TYPE as string,\n\t\tPROD_NAME as string,\n\t\tPROD_CODE as string,\n\t\tLABEL_NAME as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> ProductDim\nsource(output(\n\t\tGRP_ID as integer,\n\t\tGRP_NAME as string,\n\t\tSECTION as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> GroupDim\nsource(output(\n\t\tCONS_ID as integer,\n\t\tCONS_CODE as string,\n\t\tCONS_DESCRIPTION as string,\n\t\t{_inserted_dt} as timestamp,\n\t\t{_updated_dt} as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false) ~> ConcessionDim\nCSVSource, ShopDim lookup(toString(Shop_Code) == POS_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupShop\nLookupConcession derive(POS_ID = POS_ID,\n\t\tEMP_ID = EMP_ID,\n\t\t{_inserted_dt} = currentTimestamp(),\n\t\tCONCESSION_ID = CONS_ID,\n\t\tGRP_ID = GRP_ID,\n\t\tPROD_ID = PROD_ID,\n\t\tQuantity = quantity,\n\t\tCST = CST,\n\t\tUnit_Price = Unit_Price,\n\t\tPrice = Price,\n\t\tAmount = Amount,\n\t\tTRANSDATETIME = toTimestamp(TRANSDATE),\n\t\tTRANSTIME = TRANSTIME,\n\t\tTRANSNUM = TRANSNUM,\n\t\tTAXES1 = TAXES1,\n\t\tTAXES2 = TAXES2,\n\t\tTAX_SLAB = TAX_SLAB) ~> SetAttrributes\nLookupShop, EmployeeDim lookup(CSVSource@emp_code == EmployeeDim@EMP_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupEmployee\nLookupEmployee, ProductDim lookup(CSVSource@prod_code == ProductDim@PROD_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupProduct\nLookupProduct, GroupDim lookup(Compartment == GRP_NAME,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupGroup\nLookupGroup, ConcessionDim lookup(CONCESSION_Code == CONS_CODE,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> LookupConcession\nSetAttrributes sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:[(concat(concat('sales-',concat(concat(concat(concat (toString(dayOfMonth(  currentUTC('GMT'))) , '-' ),  toString(month(currentUTC('GMT')))), '-'), toString( year(currentUTC('GMT'))))), '.csv'))],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tEMP_ID,\n\t\t{_inserted_dt},\n\t\tCONS_ID = CONCESSION_ID,\n\t\tGRP_ID,\n\t\tPROD_ID,\n\t\tQuantity,\n\t\tCost = CST,\n\t\tUnit_Price,\n\t\tPrice,\n\t\tAmount,\n\t\tTRANSDATETIME,\n\t\tTRANSTIME,\n\t\tTRANSNUM,\n\t\tTAXES1,\n\t\tTAXES2,\n\t\tTAX_SLAB,\n\t\tPOS_ID\n\t),\n\tpartitionBy('hash', 1)) ~> sinksalesblob"
 		}
 	}
 }
