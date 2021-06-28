@@ -46,7 +46,7 @@
 				]
 			},
 			{
-				"name": "Data flow1",
+				"name": "Data flow - parse json to csv",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [
 					{
