@@ -18,131 +18,100 @@
 		"schema": {
 			"type": "object",
 			"properties": {
-				"Store_Code": {
-					"type": "integer"
-				},
-				"Store_Name": {
-					"type": "string"
-				},
-				"CAIS": {
-					"type": "integer"
-				},
-				"TRANSDATE": {
-					"type": "integer"
-				},
-				"TRANSTIME": {
-					"type": "string"
-				},
-				"TRANSNUM": {
-					"type": "integer"
-				},
-				"LINE_ID": {
-					"type": "integer"
-				},
-				"VOID_FLAG": {
-					"type": "string"
-				},
-				"RCPT_NOTE1": {
-					"type": "string"
-				},
-				"RCPT_NOTE2": {
-					"type": "string"
-				},
-				"SALE_TYPE": {
-					"type": "string"
-				},
-				"Brand": {
-					"type": "string"
-				},
-				"Department": {
-					"type": "string"
-				},
-				"SubDepartment": {
-					"type": "string"
-				},
-				"Class": {
-					"type": "string"
-				},
-				"Short_name": {
-					"type": "string"
-				},
-				"product_code": {
-					"type": "string"
-				},
-				"Waist": {
-					"type": "string"
-				},
-				"Inseam": {
-					"type": "string"
-				},
-				"NetSold_Qty": {
-					"type": "integer"
-				},
-				"Cost": {
-					"type": "string"
-				},
-				"Retail_Price": {
-					"type": "string"
-				},
-				"Unit_Price_Sold": {
-					"type": "string"
-				},
-				"Discount_ID": {
-					"type": "integer"
-				},
-				"Discount_Code": {
-					"type": "null"
-				},
-				"Discount_Description": {
-					"type": "null"
-				},
-				"Line_Applied": {
-					"type": "null"
-				},
-				"Amount_Discount": {
-					"type": "null"
-				},
-				"Percent_Discount": {
-					"type": "null"
-				},
-				"New_Price_After_Discount": {
-					"type": "null"
-				},
-				"NetSold_Amount": {
-					"type": "string"
-				},
-				"TAX_RATE": {
-					"type": "number"
-				},
-				"TAX_AMOUNT1": {
-					"type": "number"
-				},
-				"TAX_AMOUNT2": {
-					"type": "null"
-				},
-				"staff_code": {
-					"type": "string"
-				},
-				"Staff_Name": {
-					"type": "string"
-				},
-				"TS_ID": {
-					"type": "string"
-				},
-				"PriceOverride": {
-					"type": "string"
-				},
-				"Surver_Gender": {
-					"type": "null"
-				},
-				"Surver_Age": {
-					"type": "null"
-				},
-				"vipcode": {
-					"type": "string"
-				},
-				"TRANSTIMESTR": {
-					"type": "string"
+				"result": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"Amount": {
+								"type": "string"
+							},
+							"COMPANY": {
+								"type": "string"
+							},
+							"CONCESSION_Code": {
+								"type": "null"
+							},
+							"CONCESSION_Description": {
+								"type": "null"
+							},
+							"CONCESSION_ID": {
+								"type": "integer"
+							},
+							"CST": {
+								"type": "string"
+							},
+							"Compartment": {
+								"type": "string"
+							},
+							"Concession": {
+								"type": "null"
+							},
+							"Percent_Reduce": {
+								"type": "null"
+							},
+							"Price": {
+								"type": "string"
+							},
+							"Price_Reduced": {
+								"type": "null"
+							},
+							"SALE_TYPE": {
+								"type": "string"
+							},
+							"Shop_Code": {
+								"type": "integer"
+							},
+							"Shop_Name": {
+								"type": "string"
+							},
+							"SubCompartment": {
+								"type": "string"
+							},
+							"TAXES1": {
+								"type": "number"
+							},
+							"TAXES2": {
+								"type": "null"
+							},
+							"TAX_SLAB": {
+								"type": "number"
+							},
+							"TRANSDATE": {
+								"type": "integer"
+							},
+							"TRANSNUM": {
+								"type": "integer"
+							},
+							"TRANSTIME": {
+								"type": "string"
+							},
+							"TRANSTIMESTR": {
+								"type": "string"
+							},
+							"TYPE": {
+								"type": "string"
+							},
+							"Unit_Price": {
+								"type": "string"
+							},
+							"emp_Name": {
+								"type": "string"
+							},
+							"emp_code": {
+								"type": "string"
+							},
+							"nick_name": {
+								"type": "string"
+							},
+							"prod_code": {
+								"type": "string"
+							},
+							"quantity": {
+								"type": "integer"
+							}
+						}
+					}
 				}
 			}
 		}
