@@ -1,19 +1,13 @@
 {
 	"name": "RestService_dumy",
-	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"annotations": [],
 		"type": "RestService",
 		"typeProperties": {
-			"url": "http://20.84.104.210:81",
+			"url": "http://20.84.76.27:81",
 			"enableServerCertificateValidation": true,
-			"authenticationType": "Anonymous",
-			"authHeaders": {
-				"auth": {
-					"type": "SecureString",
-					"value": "**********"
-				}
-			}
+			"authenticationType": "Anonymous"
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }
