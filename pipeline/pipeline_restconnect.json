@@ -3,37 +3,9 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Fetch Token",
-				"type": "WebActivity",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"url": "https://login.microsoftonline.com/124d38e1-fd5b-4382-87c5-0323f8b79b62/oauth2/token",
-					"method": "POST",
-					"headers": {
-						"Content-type": "application/x-www-form-urlencoded"
-					},
-					"body": "grant_type=client_credentials&client_secret=Np2APxLvWiUK_pszRHSrby0g1HHv95_H~k&client_id=http://demodwhaccount&resource=https://management.azure.com\n"
-				}
-			},
-			{
 				"name": "Copy data1",
 				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "Fetch Token",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
