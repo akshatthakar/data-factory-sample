@@ -68,7 +68,7 @@
 				"type": "String"
 			},
 			{
-				"name": "Quantity",
+				"name": "quantity",
 				"type": "String"
 			},
 			{
